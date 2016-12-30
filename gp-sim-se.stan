@@ -11,20 +11,25 @@ data {
   real rho_sq;
   real sigma_sq;
 }
+
 transformed data {
   vector[N] mu;
   cov_matrix[N] Sigma;
-  for (i in 1:N)
-    mu[i] <- 0;
-  for (i in 1:N)
-    for (j in 1:N)
-    //// RBF, aka squared exp kernel, aka Gaussian
-     Sigma[i,j] <- eta_sq * exp(-rho_sq*pow(x[i] - x[j],2)) +
-     if_else(i==j, sigma_sq, 0.0);
+
+  for (i in 1:N) {
+    mu[i] = 0;
+  }
+
+  for (i in 1:N) {
+    for (j in 1:N) {
+      //// RBF, aka squared exp kernel, aka Gaussian
+      Sigma[i, j] = eta_sq * exp(-rho_sq * pow(x[i] - x[j], 2)) + (i == j ? sigma_sq : 0.0);
+    }
+  }
 }
 parameters {
   vector[N] y;
 }
 model {
-  y ~ multi_normal(mu,Sigma);
+  y ~ multi_normal(mu, Sigma);
 }
